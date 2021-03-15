@@ -14,6 +14,7 @@ public class Server{
     public int[] votes;
     public ServerSocket serverSocket;
     public String[] candidates;
+    public Thread thread;
     
     public synchronized boolean hasVoted(int student){
         return votes[student]!=-2;
@@ -41,7 +42,7 @@ public class Server{
         this.candidates = candidates1;
         resetVotes();
         serverSocket = new ServerSocket(4538);
-        Thread thread = new Thread("Server thread"){
+        thread = new Thread("Server thread"){
             @Override
             public void run(){
                 while(true){
@@ -132,14 +133,17 @@ public class Server{
         server.startVotingSystem(numberOfStudents, candidates);
         while(true){
             String[] strings = doElections(server, candidates, tutorGroup);
-            if(strings.length==1)break;
             
             server.candidates = strings;
             candidates = strings;
             server.resetVotes();
             
+            if(strings.length==1)break;
+            
+            
             if(PrintUtil.option("There was a tie! Do you wish to vote again between the winners to break the tie?", 0, new String[]{"Yes", "No"})==1)break;
         }
+        server.thread.stop();
         server.serverSocket.close();
         
         PrintUtil.newLine(2);
