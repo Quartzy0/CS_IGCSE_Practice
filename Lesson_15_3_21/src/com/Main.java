@@ -13,112 +13,72 @@ import java.util.Scanner;
 
 public class Main{
     
-    public static double doCalculation(String in){
-        if(in.contains(OperationType.SUBTRACTION.symbol)){
-            String[] split = in.split(OperationType.SUBTRACTION.symbolRegex, 2);
-            return doCalculation(new Operation(split[0], split[1], OperationType.SUBTRACTION));
+    public static String[] isolateParts(String part1, String part2){
+        int indexPart1 = -1;
+        int indexPart2 = -1;
+        for(OperationType value : OperationType.values()){
+            int newIndex1 = part1.lastIndexOf(value.symbol);
+            int newIndex2 = part2.lastIndexOf(value.symbol);
+            if(indexPart1==-1 || newIndex1>indexPart1){
+                indexPart1 = newIndex1;
+            }
+            if(indexPart2==-1 || newIndex2<indexPart2)
+                indexPart2 = part2.indexOf(value.symbol);
         }
-        if(in.contains(OperationType.ADDITION.symbol)){
-            String[] split = in.split(OperationType.ADDITION.symbolRegex, 2);
-            return doCalculation(new Operation(split[0], split[1], OperationType.ADDITION));
-        }
-        if(in.contains(OperationType.MULTIPLICATION.symbol)){
-            String[] split = in.split(OperationType.MULTIPLICATION.symbolRegex, 2);
-            return doCalculation(new Operation(split[0], split[1], OperationType.MULTIPLICATION));
-        }
-        if(in.contains(OperationType.DIVISION.symbol)){
-            String[] split = in.split(OperationType.DIVISION.symbolRegex, 2);
-            return doCalculation(new Operation(split[0], split[1], OperationType.DIVISION));
-        }
-        try{
-            return Double.parseDouble(in);
-        }catch(NumberFormatException e){}
-        return 0;
+        
+        return new String[]{part1.substring(indexPart1==-1 ? 0 : indexPart1), part2.substring(0, indexPart2==-1 ? part2.length() : indexPart2)};
     }
     
-    public static double doCalculation(Operation operation){
+    public static OperationType getType(String str){
+        if(str.contains(OperationType.DIVISION.symbol)){
+            return OperationType.DIVISION;
+        }
+        if(str.contains(OperationType.MULTIPLICATION.symbol)){
+            return OperationType.MULTIPLICATION;
+        }
+        if(str.contains(OperationType.ADDITION.symbol)){
+            return OperationType.ADDITION;
+        }
+        if(str.contains(OperationType.SUBTRACTION.symbol)){
+            return OperationType.SUBTRACTION;
+        }
+        return null;
+    }
+    
+    public static double doCalculation(String operation){
         double resPart1 = 0;
         double resPart2 = 0;
     
-        if(operation.hasType1(OperationType.ADDITION)){
-            String[] division = operation.part1.split(OperationType.ADDITION.symbolRegex, 2);
-            Operation operation1 = new Operation(division[0], division[1], OperationType.ADDITION);
-            if(!operation1.completed()){
-                resPart1 = doCalculation(operation1);
+        int i = -1;
+        if((i = operation.indexOf("/"))!=-1){
+            String[] split = operation.split("/", 2);
+            String[] split1 = isolateParts(split[0], split[1]);
+            double v = Operation.doOperation(Double.parseDouble(split1[0]), Double.parseDouble(split1[1]), OperationType.DIVISION);
+            operation = operation.replace(split1[0] + "/" +  split1[1], v + "");
+            if(getType(operation)!=null){
+                return doCalculation(operation);
             }else{
-                resPart1 = operation1.doOperation();
+                return Double.parseDouble(operation);
             }
-        }else if(operation.hasType1(OperationType.SUBTRACTION)){
-            String[] parts = operation.part1.split(OperationType.SUBTRACTION.symbolRegex, 2);
-            Operation operation1 = new Operation(parts[0], parts[1], OperationType.SUBTRACTION);
-            if(!operation1.completed()){
-                resPart1 = doCalculation(operation1);
+        }else if((i = operation.indexOf("*"))!=-1){
+            String[] split = operation.split("\\*", 2);
+            String[] split1 = isolateParts(split[0], split[1]);
+            double v = Operation.doOperation(Double.parseDouble(split1[0]), Double.parseDouble(split1[1]), OperationType.MULTIPLICATION);
+            operation = operation.replace(split1[0] + "*" +  split1[1], v + "");
+            if(getType(operation)!=null){
+                return doCalculation(operation);
             }else{
-                resPart1 = operation1.doOperation();
+                return Double.parseDouble(operation);
             }
-        } else if(operation.hasType1(OperationType.MULTIPLICATION)){
-            String[] parts = operation.part1.split(OperationType.MULTIPLICATION.symbolRegex, 2);
-            Operation operation1 = new Operation(parts[0], parts[1], OperationType.MULTIPLICATION);
-            if(!operation1.completed()){
-                resPart1 = doCalculation(operation1);
-            }else{
-                resPart1 = operation1.doOperation();
-            }
-        }else if(operation.hasType1(OperationType.DIVISION)){
-            String[] parts = operation.part1.split(OperationType.DIVISION.symbolRegex, 2);
-            Operation operation1 = new Operation(parts[0], parts[1], OperationType.DIVISION);
-            if(!operation1.completed()){
-                resPart1 = doCalculation(operation1);
-            }else{
-                resPart1 = operation1.doOperation();
-            }
-        }else{
-            resPart1 = Double.parseDouble(operation.part1);
         }
     
-        if(operation.hasType2(OperationType.SUBTRACTION)){
-            String[] division = operation.part2.split(OperationType.SUBTRACTION.symbolRegex, 2);
-            Operation operation1 = new Operation(division[0], division[1], OperationType.SUBTRACTION);
-            if(!operation1.completed()){
-                resPart2 = doCalculation(operation1);
-            }else{
-                resPart2 = operation1.doOperation();
-            }
-        }else if(operation.hasType2(OperationType.ADDITION)){
-            String[] parts = operation.part2.split(OperationType.ADDITION.symbolRegex, 2);
-            Operation operation1 = new Operation(parts[0], parts[1], OperationType.ADDITION);
-            if(!operation1.completed()){
-                resPart2 = doCalculation(operation1);
-            }else{
-                resPart2 = operation1.doOperation();
-            }
-        } else if(operation.hasType2(OperationType.MULTIPLICATION)){
-            String[] parts = operation.part2.split(OperationType.MULTIPLICATION.symbolRegex, 2);
-            Operation operation1 = new Operation(parts[0], parts[1], OperationType.MULTIPLICATION);
-            if(!operation1.completed()){
-                resPart2 = doCalculation(operation1);
-            }else{
-                resPart2 = operation1.doOperation();
-            }
-        }else if(operation.hasType2(OperationType.DIVISION)){
-            String[] parts = operation.part2.split(OperationType.DIVISION.symbolRegex, 2);
-            Operation operation1 = new Operation(parts[0], parts[1], OperationType.DIVISION);
-            if(!operation1.completed()){
-                resPart2 = doCalculation(operation1);
-            }else{
-                resPart2 = operation1.doOperation();
-            }
-        }else{
-            resPart2 = Double.parseDouble(operation.part2);
-        }
-    
-        return Operation.doOperation(resPart1, resPart2, operation.type);
+        return -1;
     }
     
     public static void main(String[] args){
-        Scanner scanner = new Scanner(System.in);
-        String input = scanner.nextLine();
-        System.out.println(doCalculation(input));
+        //Scanner scanner = new Scanner(System.in);
+        //String input = scanner.nextLine();
+        System.out.println(doCalculation("2/2/3*3"));
     }
     
     public static class Operation{
