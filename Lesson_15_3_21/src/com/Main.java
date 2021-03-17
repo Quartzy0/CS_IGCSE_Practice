@@ -22,11 +22,11 @@ public class Main{
             if(indexPart1==-1 || newIndex1>indexPart1){
                 indexPart1 = newIndex1;
             }
-            if(indexPart2==-1 || newIndex2<indexPart2)
+            if(indexPart2==-1 || (newIndex2<indexPart2 && newIndex2!=-1))
                 indexPart2 = part2.indexOf(value.symbol);
         }
         
-        return new String[]{part1.substring(indexPart1==-1 ? 0 : indexPart1), part2.substring(0, indexPart2==-1 ? part2.length() : indexPart2)};
+        return new String[]{part1.substring(indexPart1==-1 ? 0 : indexPart1+1), part2.substring(0, indexPart2==-1 ? part2.length() : indexPart2)};
     }
     
     public static OperationType getType(String str){
@@ -70,15 +70,38 @@ public class Main{
             }else{
                 return Double.parseDouble(operation);
             }
+        }else if((i = operation.indexOf("+"))!=-1){
+            String[] split = operation.split("\\+", 2);
+            String[] split1 = isolateParts(split[0], split[1]);
+            double v = Operation.doOperation(Double.parseDouble(split1[0]), Double.parseDouble(split1[1]), OperationType.ADDITION);
+            operation = operation.replace(split1[0] + "+" +  split1[1], v + "");
+            if(getType(operation)!=null){
+                return doCalculation(operation);
+            }else{
+                return Double.parseDouble(operation);
+            }
+        }else if((i = operation.indexOf("-"))!=-1){
+            String[] split = operation.split("-", 2);
+            if(split[0].isEmpty()){
+                return Double.parseDouble(operation);
+            }
+            String[] split1 = isolateParts(split[0], split[1]);
+            double v = Operation.doOperation(Double.parseDouble(split1[0]), Double.parseDouble(split1[1]), OperationType.SUBTRACTION);
+            operation = operation.replace(split1[0] + "-" +  split1[1], v + "");
+            if(getType(operation)!=null){
+                return doCalculation(operation);
+            }else{
+                return Double.parseDouble(operation);
+            }
         }
     
         return -1;
     }
     
     public static void main(String[] args){
-        //Scanner scanner = new Scanner(System.in);
-        //String input = scanner.nextLine();
-        System.out.println(doCalculation("2/2/3*3"));
+        Scanner scanner = new Scanner(System.in);
+        String input = scanner.nextLine();
+        System.out.println(doCalculation(input));
     }
     
     public static class Operation{
