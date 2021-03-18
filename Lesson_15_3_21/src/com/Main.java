@@ -10,6 +10,8 @@ package com;
 */
 
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Main{
     
@@ -22,7 +24,7 @@ public class Main{
             if(indexPart1==-1 || newIndex1>indexPart1){
                 indexPart1 = newIndex1;
             }
-            if(indexPart2==-1 || (newIndex2<indexPart2 && newIndex2!=-1))
+            if((indexPart2==-1 || (newIndex2<indexPart2 && newIndex2!=-1)) && newIndex2!=0)
                 indexPart2 = part2.indexOf(value.symbol);
         }
         
@@ -50,6 +52,19 @@ public class Main{
         double resPart2 = 0;
     
         int i = -1;
+        Pattern p = Pattern.compile(".*(\\(.*?\\)).*", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
+        Matcher m = p.matcher(operation);
+        while(m.find()){
+            String group = m.group(1);
+            String group1 = group.replace("(", "");
+            group1 = group1.replace(")", "");
+            if(getType(group)==null){
+                operation = operation.replace(group, group1);
+            }else{
+                operation = operation.replace(group, doCalculation(group1) + "");
+            }
+            m = p.matcher(operation);
+        }
         if((i = operation.indexOf("/"))!=-1){
             String[] split = operation.split("/", 2);
             String[] split1 = isolateParts(split[0], split[1]);
