@@ -9,11 +9,12 @@ package com;
     S
 */
 
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Main{
+public class Interpreter{
     
     public static String[] isolateParts(String part1, String part2){
         int indexPart1 = -1;
@@ -114,9 +115,15 @@ public class Main{
     }
     
     public static void main(String[] args){
-        Scanner scanner = new Scanner(System.in);
-        String input = scanner.nextLine();
-        System.out.println(doCalculation(input));
+        for(int i = 0; i < args.length; i++){
+            if(args[i].equalsIgnoreCase("-test")){
+                Tests.doTests();
+                System.out.println("Tested successfully");
+            }
+        }
+//        Scanner scanner = new Scanner(System.in);
+//        String input = scanner.nextLine();
+        System.out.println(doCalculation("((((((3)*3)*3)*3)/3)/3)-3"));
     }
     
     public static class Operation{
